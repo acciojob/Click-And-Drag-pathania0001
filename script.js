@@ -1,19 +1,50 @@
-// Your code here.
+  const container = document.getElementById("container");
+    const items = document.querySelectorAll(".item");
 
-const items  = document.querySelectorAll(".item")
-items.forEach((item)=>{
-item.draggable = true;
-	//console.log(item.classList[1])
-item.ondragstart = (e)=>{
-  e.dataTransfer.setData("data",item.classList[1]);
-	console.log(e.dataTransfer.getData("data"));
-}
-	item.ondragover=(e)=>{
-		e.preventDefault();
-	} 
-item.ondrop = (e)=>{
-	console.log(e);
-	const data = document.querySelector(`.${e.dataTransfer.getData("data")}`);
-  item.insertAdjacentElement("beforebegin",data)
-}
-})
+    // Position items in grid layout
+    items.forEach((item, index) => {
+      const row = Math.floor(index / 5);
+      const col = index % 5;
+      item.style.left = `${col * 210}px`;
+      item.style.top = `${row * 210}px`;
+    });
+
+    let selected = null;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    items.forEach(item => {
+      item.addEventListener("mousedown", (e) => {
+        selected = item;
+        const rect = item.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
+        item.style.cursor = "grabbing";
+      });
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (!selected) return;
+
+      const containerRect = container.getBoundingClientRect();
+      let x = e.clientX - containerRect.left - offsetX;
+      let y = e.clientY - containerRect.top - offsetY;
+
+      // Boundaries
+      const maxX = container.clientWidth - selected.clientWidth;
+      const maxY = container.clientHeight - selected.clientHeight;
+
+      x = Math.max(0, Math.min(x, maxX));
+      y = Math.max(0, Math.min(y, maxY));
+
+      selected.style.left = `${x}px`;
+      selected.style.top = `${y}px`;
+    });
+
+    document.addEventListener("mouseup", () => {
+      if (selected) {
+        selected.style.cursor = "grab";
+        selected = null;
+      }
+    });
